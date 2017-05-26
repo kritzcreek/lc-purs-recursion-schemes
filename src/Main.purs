@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, logShow)
 import Data.Either (Either(..))
-import Data.Foldable (class Foldable, fold)
+import Data.Foldable (class Foldable, fold, foldlDefault, foldrDefault)
 import Data.Functor.Nu (Nu)
 import Data.List (List)
 import Data.Maybe (Maybe(..))
@@ -30,14 +30,8 @@ divE l r = M.embed (Div l r)
 derive instance functorExprF :: Functor ExprF
 
 instance foldableExprF :: Foldable ExprF where
-  foldl f d = case _ of
-    NumLit a -> d
-    Add l r  -> f (f d r) l
-    Div l r  -> f (f d r) l
-  foldr f d = case _ of
-    NumLit a -> d
-    Add l r  -> f l (f r d)
-    Div l r  -> f l (f r d)
+  foldl f d = foldlDefault f d
+  foldr f d = foldrDefault f d
   foldMap f = case _ of
     NumLit _ -> mempty
     Add l r -> f l <> f r
