@@ -8,6 +8,7 @@ import Data.Either (Either(..))
 import Data.Foldable (class Foldable, fold)
 import Data.Functor.Nu (Nu)
 import Data.List (List)
+import Data.Maybe (Maybe(..))
 import Data.Monoid (mempty)
 import Data.Traversable (class Traversable, sequenceDefault)
 import Matryoshka as M
@@ -77,7 +78,20 @@ collect = M.cata case _ of
   NumLit i -> pure i
   x -> fold x
 
+gen :: Int -> Maybe Expr
+gen = M.anaM case _ of
+  n | n < 0 -> Nothing
+  0 -> pure $ NumLit 6
+  n -> pure $ Add (n - 1) (n - 1)
+
+showExpr :: Expr -> String
+showExpr = M.cata case _ of
+  NumLit i -> "(NumLit " <> show i <> ")"
+  Add l r -> "(Add " <> l <> " " <> r <> ")"
+  Div l r -> "(Div " <> l <> " " <> r <> ")"
+
 main :: forall e. Eff (console :: CONSOLE | e) Unit
 main = do
   logShow (eval myExpr)
   logShow (collect myExpr)
+  logShow (map showExpr (gen 2))
